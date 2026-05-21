@@ -1,0 +1,10 @@
+{
+  "short_name": "FarmaGestión",
+  "name": "FarmaGestión Pro",
+  "icons": [{"src": "icon.svg","type":"image/svg+xml","sizes":"any","purpose":"any maskable"}],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#0f1117",
+  "background_color": "#0f1117",
+  "lang": "es"
+}

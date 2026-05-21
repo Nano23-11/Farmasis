@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <meta name="theme-color" content="#0f1117"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="FarmaGestión"/>
+  <link rel="manifest" href="manifest.json"/>
+  <title>FarmaGestión Pro</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:#0f1117;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}
+    select,input,button{-webkit-appearance:none;appearance:none;font-family:inherit;}
+    input[type=number]::-webkit-inner-spin-button{opacity:1;}
+    ::-webkit-scrollbar{width:4px;height:4px;}
+    ::-webkit-scrollbar-track{background:#1e293b;}
+    ::-webkit-scrollbar-thumb{background:#334155;border-radius:4px;}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel" data-presets="react">
+    const { useState, useMemo } = React;
+
+
+const fmt = n => `$${Number(n).toLocaleString("es-AR")}`;
+const hoy = () => new Date().toISOString().slice(0,10);
+
+const PRODS = [
+  {id:1,cat:"Accesorios",nom:"Catéter tipo Abbiccat 14-16-18-20-22-24",costo:400,pventa:650,cantOfer:"20 unidades surtidas",poferta:600,stock:40,ofActiva:false},
+  {id:2,cat:"Accesorios",nom:"Cortaúñas Trim chico caja x 24 unid",costo:6000,pventa:8800,cantOfer:"2 cajas x 24 unidades",poferta:8000,stock:6,ofActiva:false},
+  {id:3,cat:"Accesorios",nom:"Cortaúñas Trim grande caja x 12 unid",costo:4500,pventa:6600,cantOfer:"2 cajas x 12 unidades",poferta:6000,stock:4,ofActiva:false},
+  {id:4,cat:"Accesorios",nom:"Electrodos 3M x 50 unidades",costo:9500,pventa:13500,cantOfer:"5 pack x 50 unidades",poferta:12500,stock:15,ofActiva:false},
+  {id:5,cat:"Accesorios",nom:"Frasco estéril x 125 ml",costo:200,pventa:289,cantOfer:"200 unidades",poferta:289,stock:300,ofActiva:false},
+  {id:6,cat:"Accesorios",nom:"Guantes látex S-M-L x 100 unidades",costo:5000,pventa:7100,cantOfer:"-",poferta:7100,stock:20,ofActiva:false},
+  {id:7,cat:"Accesorios",nom:"Guantes nitrilo negro x 100 unidades S-M-L",costo:6500,pventa:9100,cantOfer:"-",poferta:9100,stock:15,ofActiva:false},
+  {id:8,cat:"Accesorios",nom:"Iodopovidona x 30 ml",costo:1600,pventa:2300,cantOfer:"-",poferta:2300,stock:50,ofActiva:false},
+  {id:9,cat:"Accesorios",nom:"Micropore 3M 2.50 cm caja x 12 unidades",costo:15000,pventa:21500,cantOfer:"2 cajas x 12 unidades",poferta:19700,stock:8,ofActiva:false},
+  {id:10,cat:"Accesorios",nom:"Micropore Euromix 1.25 sin rac x 24 unidades",costo:4500,pventa:6500,cantOfer:"2 cajas x 24 unidades",poferta:6000,stock:10,ofActiva:false},
+  {id:11,cat:"Accesorios",nom:"Micropore Euromix 2.50 sin rac x 12 unidades",costo:4500,pventa:6500,cantOfer:"2 cajas x 12 unidades",poferta:6000,stock:10,ofActiva:false},
+  {id:12,cat:"Accesorios",nom:"Micropore Hipoalergic 1.25 sin rac x 24 unidades",costo:7000,pventa:10100,cantOfer:"2 cajas x 24 unidades",poferta:9300,stock:6,ofActiva:false},
+  {id:13,cat:"Accesorios",nom:"Micropore Hipoalergic 2.50 sin rac x 12 unidades",costo:7000,pventa:10100,cantOfer:"2 cajas x 12 unidades",poferta:9300,stock:6,ofActiva:false},
+  {id:14,cat:"Accesorios",nom:"Off aerosol x 170 ml",costo:4400,pventa:6300,cantOfer:"-",poferta:6300,stock:12,ofActiva:false},
+  {id:15,cat:"Accesorios",nom:"Perfilador de ceja x 3 unidades",costo:900,pventa:1400,cantOfer:"6 blisters x 3 unidades",poferta:1300,stock:24,ofActiva:false},
+  {id:16,cat:"Accesorios",nom:"Pinza depilar XZN negra económica x 12 unidades",costo:7500,pventa:11000,cantOfer:"2 blisters",poferta:10100,stock:8,ofActiva:false},
+  {id:17,cat:"Accesorios",nom:"Prestobarba 2 filos Bolsa x 10 unidades",costo:9000,pventa:12800,cantOfer:"-",poferta:12800,stock:15,ofActiva:false},
+  {id:18,cat:"Accesorios",nom:"Sanacutis manteca cacao x 20 unidades",costo:13000,pventa:18500,cantOfer:"4 expendedores",poferta:17500,stock:8,ofActiva:false},
+  {id:19,cat:"Accesorios",nom:"Sonda Foley silicona pura 14-16-18-20-22",costo:2800,pventa:4000,cantOfer:"10 unidades surtidas",poferta:3500,stock:30,ofActiva:false},
+  {id:20,cat:"Accesorios",nom:"Tensiómetro digital de muñeca Euromix",costo:22000,pventa:32000,cantOfer:"2 unidades",poferta:29500,stock:5,ofActiva:false},
+  {id:21,cat:"Accesorios",nom:"Tensiómetro con estetoscopio Adulto Euromix",costo:14000,pventa:20000,cantOfer:"2 unidades",poferta:18500,stock:6,ofActiva:false},
+  {id:22,cat:"Accesorios",nom:"Termómetro digital",costo:1600,pventa:2400,cantOfer:"12 unidades",poferta:2150,stock:20,ofActiva:false},
+  {id:23,cat:"Accesorios",nom:"Test embarazo",costo:450,pventa:700,cantOfer:"12 unidades",poferta:650,stock:36,ofActiva:false},
+  {id:24,cat:"Accesorios",nom:"Venda autoadherente covan 10 cm x 4.5 mts",costo:1400,pventa:2100,cantOfer:"6 unidades surtidas",poferta:1950,stock:24,ofActiva:false},
+  {id:25,cat:"Accesorios",nom:"Venda cambric 5 cm x 12 unidades",costo:2500,pventa:3600,cantOfer:"-",poferta:3600,stock:10,ofActiva:false},
+  {id:26,cat:"Accesorios",nom:"Venda cambric 7 cm x 12 unidades",costo:3200,pventa:4600,cantOfer:"-",poferta:4600,stock:10,ofActiva:false},
+  {id:27,cat:"Accesorios",nom:"Venda cambric 10 cm x 12 unidades",costo:4400,pventa:6300,cantOfer:"-",poferta:6300,stock:10,ofActiva:false},
+  {id:28,cat:"Genérico",nom:"Amoxicilina x 8 comp",costo:700,pventa:1100,cantOfer:"60 tiras",poferta:1000,stock:120,ofActiva:false},
+  {id:29,cat:"Genérico",nom:"Amoxicilina + Clavul 1gr x 14 comp",costo:5500,pventa:8100,cantOfer:"12 unidades",poferta:7500,stock:24,ofActiva:false},
+  {id:30,cat:"Genérico",nom:"Azitromicina x 3 comp",costo:1100,pventa:1620,cantOfer:"30 tiras",poferta:1467,stock:60,ofActiva:false},
+  {id:31,cat:"Genérico",nom:"Cefalexina 500 comp",costo:1100,pventa:1600,cantOfer:"30 tiras",poferta:1473,stock:60,ofActiva:false},
+  {id:32,cat:"Genérico",nom:"Ciprofloxacina 500 x 10 comp",costo:1100,pventa:1650,cantOfer:"-",poferta:1513,stock:40,ofActiva:false},
+  {id:33,cat:"Genérico",nom:"Dexametasona ampolla",costo:880,pventa:1300,cantOfer:"-",poferta:1300,stock:30,ofActiva:false},
+  {id:34,cat:"Genérico",nom:"Diclofenac 100 mg comp",costo:720,pventa:1102,cantOfer:"50 tiras",poferta:1014,stock:100,ofActiva:false},
+  {id:35,cat:"Genérico",nom:"Diclofenac 75 mg x 15 comp",costo:380,pventa:581,cantOfer:"-",poferta:581,stock:60,ofActiva:false},
+  {id:36,cat:"Genérico",nom:"Diclofenac ampolla",costo:520,pventa:783,cantOfer:"-",poferta:783,stock:50,ofActiva:false},
+  {id:37,cat:"Genérico",nom:"Diclofenac potásico 75 comp",costo:620,pventa:950,cantOfer:"50 tiras",poferta:878,stock:100,ofActiva:false},
+  {id:38,cat:"Genérico",nom:"Diclo + Pridinol x 10 comp (verde)",costo:370,pventa:570,cantOfer:"54 tiras",poferta:528,stock:108,ofActiva:false},
+  {id:39,cat:"Genérico",nom:"Difenhidramina comp",costo:2200,pventa:3240,cantOfer:"-",poferta:3240,stock:20,ofActiva:false},
+  {id:40,cat:"Genérico",nom:"Fluconazol x 2 comp",costo:310,pventa:470,cantOfer:"50 tiras",poferta:432,stock:100,ofActiva:false},
+  {id:41,cat:"Genérico",nom:"Furosemida",costo:390,pventa:590,cantOfer:"30 tiras",poferta:540,stock:60,ofActiva:false},
+  {id:42,cat:"Genérico",nom:"Ibuprofeno 4% jarabe",costo:1100,pventa:1640,cantOfer:"24 unidades",poferta:1508,stock:48,ofActiva:false},
+  {id:43,cat:"Genérico",nom:"Ibuprofeno 400 comp",costo:310,pventa:470,cantOfer:"50 tiras",poferta:430,stock:100,ofActiva:false},
+  {id:44,cat:"Genérico",nom:"Ibuprofeno 600 comp",costo:480,pventa:720,cantOfer:"50 tiras",poferta:662,stock:100,ofActiva:false},
+  {id:45,cat:"Genérico",nom:"Ketorolac 20mg Microsules comp",costo:430,pventa:650,cantOfer:"50 tiras",poferta:594,stock:100,ofActiva:false},
+  {id:46,cat:"Genérico",nom:"Ketorolac SL Microsules comp",costo:360,pventa:550,cantOfer:"50 tiras",poferta:500,stock:100,ofActiva:false},
+  {id:47,cat:"Genérico",nom:"Loperamida x 10 comp",costo:310,pventa:470,cantOfer:"30 tiras",poferta:433,stock:60,ofActiva:false},
+  {id:48,cat:"Genérico",nom:"Loratadina comp",costo:440,pventa:660,cantOfer:"30 tiras",poferta:610,stock:60,ofActiva:false},
+  {id:49,cat:"Genérico",nom:"Losartan 50 mg Klonal comp",costo:580,pventa:870,cantOfer:"50 tiras",poferta:800,stock:100,ofActiva:false},
+  {id:50,cat:"Genérico",nom:"Naproxeno",costo:1950,pventa:2920,cantOfer:"-",poferta:2920,stock:30,ofActiva:false},
+  {id:51,cat:"Genérico",nom:"Norgestrel max unidosis comp",costo:880,pventa:1323,cantOfer:"30 tiras",poferta:1217,stock:60,ofActiva:false},
+  {id:52,cat:"Genérico",nom:"Norgestrel plus comp",costo:3700,pventa:5500,cantOfer:"15 tiras",poferta:5120,stock:30,ofActiva:false},
+  {id:53,cat:"Genérico",nom:"Omeprazol x 14 caps",costo:350,pventa:550,cantOfer:"105/210 tiras",poferta:522,stock:210,ofActiva:false},
+  {id:54,cat:"Genérico",nom:"Pantoprazol 40 mg",costo:1400,pventa:2100,cantOfer:"-",poferta:2100,stock:30,ofActiva:false},
+  {id:55,cat:"Genérico",nom:"Rhinal gotas",costo:1600,pventa:2350,cantOfer:"-",poferta:2350,stock:20,ofActiva:false},
+  {id:56,cat:"Genérico",nom:"Rifamicina spray",costo:7500,pventa:10700,cantOfer:"-",poferta:10700,stock:10,ofActiva:false},
+  {id:57,cat:"Genérico",nom:"Salbutamol aerosol x 250 dosis",costo:3800,pventa:5450,cantOfer:"-",poferta:5700,stock:15,ofActiva:false},
+  {id:58,cat:"Genérico",nom:"Sindol 600 mg x 10 caps",costo:2100,pventa:3100,cantOfer:"24 tiras",poferta:2871,stock:48,ofActiva:false},
+  {id:59,cat:"Genérico",nom:"Viripotens 50 mg comp",costo:88,pventa:131,cantOfer:"5 cajas x 30 unidades",poferta:131,stock:150,ofActiva:false},
+  {id:60,cat:"Genérico",nom:"Viripotens 100 mg comp",costo:195,pventa:292,cantOfer:"3 cajas x 30 unidades",poferta:292,stock:90,ofActiva:false},
+  {id:61,cat:"Genérico",nom:"Vitacortil crema",costo:4300,pventa:6350,cantOfer:"-",poferta:6350,stock:15,ofActiva:false},
+];
+
+const CLIENTES_INI = [
+  {id:1,nombre:"Farmacia Central",tel:"351-1234567",email:"central@farm.com",deuda:45000},
+  {id:2,nombre:"Farmacia del Pueblo",tel:"351-7654321",email:"pueblo@farm.com",deuda:12000},
+  {id:3,nombre:"Farmacia San Martín",tel:"351-9876543",email:"sanmartin@farm.com",deuda:0},
+];
+const PROVS_INI = [
+  {id:1,nombre:"3M Argentina",contacto:"info@3m.com.ar",tel:"011-4000-3333",deuda:85000},
+  {id:2,nombre:"Euromix Distribuidora",contacto:"ventas@euromix.com",tel:"351-4445566",deuda:32000},
+  {id:3,nombre:"Laboratorio Microsules",contacto:"microsules@lab.com",tel:"011-5000-1111",deuda:0},
+];
+const VENTAS_INI = [
+  {id:1,fecha:"2026-05-01",cliId:1,cliNom:"Farmacia Central",prodId:44,prodNom:"Ibuprofeno 600 comp",cant:50,precio:662,costo:480,total:33100},
+  {id:2,fecha:"2026-05-03",cliId:2,cliNom:"Farmacia del Pueblo",prodId:28,prodNom:"Amoxicilina x 8 comp",cant:30,precio:1000,costo:700,total:30000},
+  {id:3,fecha:"2026-05-05",cliId:1,cliNom:"Farmacia Central",prodId:53,prodNom:"Omeprazol x 14 caps",cant:60,precio:522,costo:350,total:31320},
+  {id:4,fecha:"2026-05-08",cliId:3,cliNom:"Farmacia San Martín",prodId:22,prodNom:"Termómetro digital",cant:12,precio:2150,costo:1600,total:25800},
+  {id:5,fecha:"2026-05-10",cliId:2,cliNom:"Farmacia del Pueblo",prodId:43,prodNom:"Ibuprofeno 400 comp",cant:50,precio:430,costo:310,total:21500},
+  {id:6,fecha:"2026-05-12",cliId:1,cliNom:"Farmacia Central",prodId:37,prodNom:"Diclofenac potásico 75 comp",cant:50,precio:878,costo:620,total:43900},
+  {id:7,fecha:"2026-05-14",cliId:3,cliNom:"Farmacia San Martín",prodId:49,prodNom:"Losartan 50 mg Klonal comp",cant:50,precio:800,costo:580,total:40000},
+];
+
+const TABS = ["Dashboard","Pedidos","Productos","Ventas","Clientes","Proveedores","Stock"];
+
+// ─── Estilos base ───────────────────────────────────────────────
+const C = {
+  page:{fontFamily:"'Segoe UI',sans-serif",background:"#0f1117",minHeight:"100vh",color:"#e2e8f0"},
+  card:{background:"#1e293b",borderRadius:14,padding:20,border:"1px solid #2d3748"},
+  inp:{width:"100%",padding:"10px 14px",borderRadius:10,border:"1px solid #2d3748",background:"#0f1117",color:"#e2e8f0",fontSize:13,boxSizing:"border-box"},
+  sel:{width:"100%",padding:"10px 14px",borderRadius:10,border:"1px solid #2d3748",background:"#0f1117",color:"#e2e8f0",fontSize:13},
+  lbl:{fontSize:12,fontWeight:600,color:"#64748b",marginBottom:6,marginTop:14,display:"block"},
+  th:{padding:"11px 13px",textAlign:"left",color:"#64748b",fontWeight:600,borderBottom:"1px solid #2d3748",whiteSpace:"nowrap",fontSize:12},
+  td:{padding:"9px 13px",borderBottom:"1px solid #1a2233",fontSize:12},
+  btn:(bg,c2)=>({padding:"10px 18px",background:bg,border:"none",borderRadius:10,color:c2||"#0f172a",fontWeight:700,cursor:"pointer",fontSize:13}),
+};
+
+// ─── App principal ──────────────────────────────────────────────
+function App() {
+  const [tab, setTab] = useState("Dashboard");
+  const [prods, setProds] = useState(PRODS);
+  const [clientes, setClientes] = useState(CLIENTES_INI);
+  const [provs, setProvs] = useState(PROVS_INI);
+  const [ventas, setVentas] = useState(VENTAS_INI);
+
+  // Pedidos clientes
+  const [pedCli, setPedCli] = useState([]);
+  const [pedCliAct, setPedCliAct] = useState(null);
+  const [busqCli, setBusqCli] = useState("");
+  // Pedidos proveedores
+  const [pedProv, setPedProv] = useState([]);
+  const [pedProvAct, setPedProvAct] = useState(null);
+  const [busqProv, setBusqProv] = useState("");
+  const [subTab, setSubTab] = useState("cli");
+
+  // Modales
+  const [mVenta, setMVenta] = useState(false);
+  const [mCliente, setMCliente] = useState(false);
+  const [mProveedor, setMProveedor] = useState(false);
+  const [mProducto, setMProducto] = useState(false);
+  const [mEditar, setMEditar] = useState(null);
+  const [ep, setEp] = useState(null);
+  const [mDeudaCli, setMDeudaCli] = useState(null);
+  const [mDeudaProv, setMDeudaProv] = useState(null);
+
+  // Filtros
+  const [busq, setBusq] = useState("");
+  const [fCat, setFCat] = useState("Todos");
+  const [fVCli, setFVCli] = useState("");
+  const [fVDesde, setFVDesde] = useState("");
+  const [fVHasta, setFVHasta] = useState("");
+
+  // Forms
+  const [nv, setNv] = useState({cliId:"",prodId:"",cant:1,oferta:false});
+  const [nc, setNc] = useState({nombre:"",tel:"",email:""});
+  const [np, setNp] = useState({nombre:"",contacto:"",tel:""});
+  const [nProd, setNProd] = useState({cat:"Accesorios",nom:"",costo:"",pventa:"",cantOfer:"",poferta:"",stock:""});
+
+  // ── Computed ──
+  const prodsFilt = useMemo(()=>{
+    let a=[...prods].sort((a,b)=>a.nom.localeCompare(b.nom));
+    if(fCat!=="Todos") a=a.filter(p=>p.cat===fCat);
+    if(busq) a=a.filter(p=>p.nom.toLowerCase().includes(busq.toLowerCase()));
+    return a;
+  },[prods,fCat,busq]);
+
+  const ventasFilt = useMemo(()=>{
+    let a=[...ventas].sort((a,b)=>b.fecha.localeCompare(a.fecha));
+    if(fVCli) a=a.filter(v=>v.cliId===Number(fVCli));
+    if(fVDesde) a=a.filter(v=>v.fecha>=fVDesde);
+    if(fVHasta) a=a.filter(v=>v.fecha<=fVHasta);
+    return a;
+  },[ventas,fVCli,fVDesde,fVHasta]);
+
+  const topProds = useMemo(()=>{
+    const m={};
+    ventas.forEach(v=>{if(!m[v.prodNom])m[v.prodNom]={q:0,t:0};m[v.prodNom].q+=v.cant;m[v.prodNom].t+=v.total;});
+    return Object.entries(m).sort((a,b)=>b[1].q-a[1].q).slice(0,6);
+  },[ventas]);
+
+  const totDeudaCli = clientes.reduce((s,c)=>s+c.deuda,0);
+  const totDeudaProv = provs.reduce((s,p)=>s+p.deuda,0);
+  const totalVentas = ventas.reduce((s,v)=>s+v.total,0);
+  const ganTotal = ventas.reduce((s,v)=>s+(v.total-v.costo*v.cant),0);
+  const stockBajo = prods.filter(p=>p.stock<=5).length;
+
+  // ── Pedidos Clientes ──
+  function nuevoPedCli(cliId){
+    const c=clientes.find(x=>x.id===Number(cliId)); if(!c) return;
+    const p={id:Date.now(),fecha:hoy(),cliId:c.id,cliNom:c.nombre,items:[],estado:"abierto"};
+    setPedCli([p,...pedCli]); setPedCliAct(p.id);
+  }
+  function addItemCli(pid,prodId,cant,oferta){
+    const prod=prods.find(p=>p.id===Number(prodId)); if(!prod||cant<1) return;
+    const precio=oferta?prod.poferta:prod.pventa;
+    setPedCli(pedCli.map(p=>{
+      if(p.id!==pid) return p;
+      const ex=p.items.find(i=>i.prodId===prod.id);
+      if(ex) return{...p,items:p.items.map(i=>i.prodId===prod.id?{...i,cant:i.cant+Number(cant),sub:i.precio*(i.cant+Number(cant))}:i)};
+      return{...p,items:[...p.items,{prodId:prod.id,nom:prod.nom,cant:Number(cant),precio,costo:prod.costo,sub:precio*Number(cant),oferta}]};
+    }));
+  }
+  function removeItemCli(pid,prodId){setPedCli(pedCli.map(p=>p.id===pid?{...p,items:p.items.filter(i=>i.prodId!==prodId)}:p));}
+  function cantItemCli(pid,prodId,cant){if(cant<1)return;setPedCli(pedCli.map(p=>p.id===pid?{...p,items:p.items.map(i=>i.prodId===prodId?{...i,cant:Number(cant),sub:i.precio*Number(cant)}:i)}:p));}
+  function confirmarCli(pid){
+    const ped=pedCli.find(p=>p.id===pid); if(!ped||ped.items.length===0) return;
+    let ps=[...prods];
+    ped.items.forEach(i=>{ps=ps.map(p=>p.id===i.prodId?{...p,stock:Math.max(0,p.stock-i.cant)}:p);});
+    setProds(ps);
+    const nv2=ped.items.map((i,idx)=>({id:ventas.length+idx+1,fecha:ped.fecha,cliId:ped.cliId,cliNom:ped.cliNom,prodId:i.prodId,prodNom:i.nom,cant:i.cant,precio:i.precio,costo:i.costo,total:i.sub}));
+    setVentas([...ventas,...nv2]);
+    setPedCli(pedCli.map(p=>p.id===pid?{...p,estado:"entregado"}:p)); setPedCliAct(null);
+  }
+  function cancelarCli(pid){setPedCli(pedCli.map(p=>p.id===pid?{...p,estado:"cancelado"}:p));if(pedCliAct===pid)setPedCliAct(null);}
+
+  // ── Pedidos Proveedores ──
+  function nuevoPedProv(provId){
+    const pr=provs.find(x=>x.id===Number(provId)); if(!pr) return;
+    const p={id:Date.now(),fecha:hoy(),provId:pr.id,provNom:pr.nombre,items:[],estado:"pendiente"};
+    setPedProv([p,...pedProv]); setPedProvAct(p.id);
+  }
+  function addItemProv(pid,prodId,cant){
+    const prod=prods.find(p=>p.id===Number(prodId)); if(!prod||cant<1) return;
+    setPedProv(pedProv.map(p=>{
+      if(p.id!==pid) return p;
+      const ex=p.items.find(i=>i.prodId===prod.id);
+      if(ex) return{...p,items:p.items.map(i=>i.prodId===prod.id?{...i,cant:i.cant+Number(cant),sub:i.costo*(i.cant+Number(cant))}:i)};
+      return{...p,items:[...p.items,{prodId:prod.id,nom:prod.nom,cant:Number(cant),costo:prod.costo,sub:prod.costo*Number(cant)}]};
+    }));
+  }
+  function removeItemProv(pid,prodId){setPedProv(pedProv.map(p=>p.id===pid?{...p,items:p.items.filter(i=>i.prodId!==prodId)}:p));}
+  function cantItemProv(pid,prodId,cant){if(cant<1)return;setPedProv(pedProv.map(p=>p.id===pid?{...p,items:p.items.map(i=>i.prodId===prodId?{...i,cant:Number(cant),sub:i.costo*Number(cant)}:i)}:p));}
+  function recibirProv(pid){
+    const ped=pedProv.find(p=>p.id===pid); if(!ped||ped.items.length===0) return;
+    let ps=[...prods];
+    ped.items.forEach(i=>{ps=ps.map(p=>p.id===i.prodId?{...p,stock:p.stock+i.cant}:p);});
+    setProds(ps);
+    const total=ped.items.reduce((s,i)=>s+i.sub,0);
+    setProvs(provs.map(p=>p.id===ped.provId?{...p,deuda:p.deuda+total}:p));
+    setPedProv(pedProv.map(p=>p.id===pid?{...p,estado:"recibido"}:p)); setPedProvAct(null);
+  }
+  function cancelarProv(pid){setPedProv(pedProv.map(p=>p.id===pid?{...p,estado:"cancelado"}:p));if(pedProvAct===pid)setPedProvAct(null);}
+
+  // ── Otras acciones ──
+  function registrarVenta(){
+    const cl=clientes.find(c=>c.id===Number(nv.cliId));
+    const pr=prods.find(p=>p.id===Number(nv.prodId));
+    if(!cl||!pr||nv.cant<1) return;
+    const precio=nv.oferta?pr.poferta:pr.pventa;
+    const total=precio*Number(nv.cant);
+    setVentas([...ventas,{id:ventas.length+1,fecha:hoy(),cliId:cl.id,cliNom:cl.nombre,prodId:pr.id,prodNom:pr.nom,cant:Number(nv.cant),precio,costo:pr.costo,total}]);
+    setProds(prods.map(p=>p.id===pr.id?{...p,stock:Math.max(0,p.stock-Number(nv.cant))}:p));
+    setNv({cliId:"",prodId:"",cant:1,oferta:false}); setMVenta(false);
+  }
+  function guardarEditar(){
+    if(!ep) return;
+    setProds(prods.map(p=>p.id===ep.id?{...p,costo:Number(ep.costo),pventa:Number(ep.pventa),poferta:Number(ep.poferta),cantOfer:ep.cantOfer,ofActiva:ep.ofActiva}:p));
+    setMEditar(null); setEp(null);
+  }
+  function exportar(){
+    const rows=[["Cat","Producto","Costo","Precio Venta","Gan%","Cant Oferta","P.Oferta","Stock"]];
+    [...prods].sort((a,b)=>a.nom.localeCompare(b.nom)).forEach(p=>{
+      const g=p.costo>0?(((p.pventa-p.costo)/p.costo)*100).toFixed(1)+"%":"-";
+      rows.push([p.cat,p.nom,p.costo,p.pventa,g,p.cantOfer,p.poferta,p.stock]);
+    });
+    const csv=rows.map(r=>r.map(v=>`"${v}"`).join(",")).join("\n");
+    const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+    const url=URL.createObjectURL(blob); const a=document.createElement("a");
+    a.href=url; a.download="lista_precios.csv"; a.click(); URL.revokeObjectURL(url);
+  }
+
+  const totFilt=ventasFilt.reduce((s,v)=>s+v.total,0);
+  const ganFilt=ventasFilt.reduce((s,v)=>s+(v.total-v.costo*v.cant),0);
+
+  // ── Render ──
+  return (
+    <div style={C.page}>
+      {/* Header */}
+      <div style={{background:"linear-gradient(135deg,#1a1f2e,#0d1117)",borderBottom:"1px solid #2d3748",padding:"0 20px"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,paddingTop:14,paddingBottom:8}}>
+          <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#38bdf8,#818cf8)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>💊</div>
+          <div>
+            <div style={{fontWeight:700,fontSize:17,color:"#f1f5f9"}}>FarmaGestión Pro</div>
+            <div style={{fontSize:11,color:"#64748b"}}>Sistema integral · Mayo 2026</div>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:0,overflowX:"auto"}}>
+          {TABS.map(t=>(
+            <button key={t} onClick={()=>setTab(t)} style={{padding:"9px 15px",border:"none",cursor:"pointer",fontSize:12,fontWeight:600,borderRadius:"7px 7px 0 0",background:tab===t?"#1e293b":"transparent",color:tab===t?"#38bdf8":"#64748b",borderBottom:tab===t?"2px solid #38bdf8":"2px solid transparent",whiteSpace:"nowrap"}}>
+              {t==="Pedidos"?"🛒 "+t:t}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{padding:20,maxWidth:1200,margin:"0 auto"}}>
+
+        {/* ── DASHBOARD ── */}
+        {tab==="Dashboard"&&(
+          <div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12,marginBottom:22}}>
+              {[
+                {l:"Ventas del Mes",v:fmt(totalVentas),i:"📈",c:"#22c55e"},
+                {l:"Ganancia Total",v:fmt(ganTotal),i:"💰",c:"#a78bfa"},
+                {l:"Deuda Clientes",v:fmt(totDeudaCli),i:"🏦",c:"#f59e0b"},
+                {l:"Deuda Proveedores",v:fmt(totDeudaProv),i:"📦",c:"#ef4444"},
+                {l:"Stock Bajo",v:`${stockBajo} prod.`,i:"⚠️",c:"#f97316"},
+              ].map(x=>(
+                <div key={x.l} style={{...C.card,border:`1px solid ${x.c}33`}}>
+                  <div style={{fontSize:22}}>{x.i}</div>
+                  <div style={{fontSize:17,fontWeight:700,color:x.c,marginTop:6}}>{x.v}</div>
+                  <div style={{fontSize:11,color:"#64748b",marginTop:3}}>{x.l}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+              <div style={C.card}>
+                <div style={{fontWeight:700,marginBottom:12,color:"#38bdf8"}}>🏆 Más vendidos</div>
+                {topProds.map(([nom,d],i)=>(
+                  <div key={nom} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:"1px solid #2d3748"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}>
+                      <span style={{background:i<3?"#38bdf8":"#334155",color:i<3?"#0f172a":"#94a3b8",borderRadius:6,padding:"2px 6px",fontSize:10,fontWeight:700}}>#{i+1}</span>
+                      <span style={{fontSize:12,maxWidth:140,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{nom}</span>
+                    </div>
+                    <div style={{textAlign:"right"}}>
+                      <div style={{fontSize:11,color:"#22c55e",fontWeight:700}}>{d.q} uds</div>
+                      <div style={{fontSize:10,color:"#64748b"}}>{fmt(d.t)}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={C.card}>
+                <div style={{fontWeight:700,marginBottom:12,color:"#818cf8"}}>🕐 Últimas ventas</div>
+                {[...ventas].reverse().slice(0,6).map(v=>(
+                  <div key={v.id} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid #2d3748"}}>
+                    <div>
+                      <div style={{fontSize:12,fontWeight:600}}>{v.cliNom}</div>
+                      <div style={{fontSize:11,color:"#64748b"}}>{v.prodNom.slice(0,25)}…</div>
+                    </div>
+                    <div style={{textAlign:"right"}}>
+                      <div style={{fontSize:12,color:"#22c55e",fontWeight:700}}>{fmt(v.total)}</div>
+                      <div style={{fontSize:10,color:"#64748b"}}>{v.fecha}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── PEDIDOS ── */}
+        {tab==="Pedidos"&&(
+          <div>
+            <div style={{display:"flex",gap:8,marginBottom:18,alignItems:"center",flexWrap:"wrap"}}>
+              <button onClick={()=>setSubTab("cli")} style={{...C.btn(subTab==="cli"?"linear-gradient(135deg,#38bdf8,#818cf8)":"#1e293b",subTab==="cli"?"#0f172a":"#64748b")}}>🛒 Pedidos de Clientes</button>
+              <button onClick={()=>setSubTab("prov")} style={{...C.btn(subTab==="prov"?"linear-gradient(135deg,#f59e0b,#ef4444)":"#1e293b",subTab==="prov"?"#0f172a":"#64748b")}}>📦 Pedidos a Proveedores</button>
+              <div style={{marginLeft:"auto",fontSize:12,color:"#64748b"}}>
+                Abiertos clientes: <b style={{color:"#38bdf8"}}>{pedCli.filter(p=>p.estado==="abierto").length}</b>
+                {" · "}Pendientes prov: <b style={{color:"#f59e0b"}}>{pedProv.filter(p=>p.estado==="pendiente").length}</b>
+              </div>
+            </div>
+
+            {subTab==="cli"&&(
+              <PanelCli prods={prods} clientes={clientes} pedCli={pedCli} pedCliAct={pedCliAct}
+                setPedCliAct={setPedCliAct} busqCli={busqCli} setBusqCli={setBusqCli}
+                nuevoPedCli={nuevoPedCli} addItemCli={addItemCli} removeItemCli={removeItemCli}
+                cantItemCli={cantItemCli} confirmarCli={confirmarCli} cancelarCli={cancelarCli}
+                fmt={fmt} C={C}/>
+            )}
+            {subTab==="prov"&&(
+              <PanelProv prods={prods} provs={provs} pedProv={pedProv} pedProvAct={pedProvAct}
+                setPedProvAct={setPedProvAct} busqProv={busqProv} setBusqProv={setBusqProv}
+                nuevoPedProv={nuevoPedProv} addItemProv={addItemProv} removeItemProv={removeItemProv}
+                cantItemProv={cantItemProv} recibirProv={recibirProv} cancelarProv={cancelarProv}
+                fmt={fmt} C={C}/>
+            )}
+          </div>
+        )}
+
+        {/* ── PRODUCTOS ── */}
+        {tab==="Productos"&&(
+          <div>
+            <div style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap",alignItems:"center"}}>
+              <input placeholder="🔍 Buscar..." value={busq} onChange={e=>setBusq(e.target.value)} style={{...C.inp,flex:1,minWidth:160}}/>
+              {["Todos","Accesorios","Genérico"].map(x=>(
+                <button key={x} onClick={()=>setFCat(x)} style={{...C.btn(fCat===x?"#38bdf8":"#1e293b",fCat===x?"#0f172a":"#64748b"),padding:"9px 13px"}}>{x}</button>
+              ))}
+              <button onClick={exportar} style={{...C.btn("transparent"),border:"1px solid #22c55e",color:"#22c55e",padding:"9px 13px"}}>⬇ CSV</button>
+              <button onClick={()=>setMProducto(true)} style={{...C.btn("linear-gradient(135deg,#38bdf8,#818cf8)"),padding:"9px 13px"}}>+ Producto</button>
+            </div>
+            {[["Accesorios","🩺 ACCESORIOS","#4ade80","#0e4429","#4ade8033"],["Genérico","💊 MEDICAMENTOS GENÉRICOS","#a5b4fc","#1e1b4b","#a5b4fc33"]].map(([cat,lbl,col,bg,bord])=>{
+              const lista=prodsFilt.filter(p=>p.cat===cat);
+              if((fCat!=="Todos"&&fCat!==cat)||lista.length===0) return null;
+              return(
+                <div key={cat} style={{marginBottom:24}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+                    <div style={{background:bg,color:col,padding:"5px 14px",borderRadius:8,fontWeight:800,fontSize:12,border:`1px solid ${bord}`}}>{lbl}</div>
+                    <div style={{fontSize:11,color:"#64748b"}}>{lista.length} productos</div>
+                    <div style={{flex:1,height:1,background:bord}}/>
+                  </div>
+                  <div style={{overflowX:"auto"}}>
+                    <table style={{width:"100%",borderCollapse:"collapse"}}>
+                      <thead><tr style={{background:"#0f172a"}}>{["Producto","Costo","Precio","Gan%","Cant.Oferta","P.Oferta","Stock",""].map(h=><th key={h} style={C.th}>{h}</th>)}</tr></thead>
+                      <tbody>
+                        {lista.map(p=>{
+                          const g=p.costo>0?((p.pventa-p.costo)/p.costo*100).toFixed(0):null;
+                          return(
+                            <tr key={p.id} onMouseEnter={e=>e.currentTarget.style.background="#1e293b"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                              <td style={{...C.td,maxWidth:210}}>
+                                {p.nom}
+                                {p.ofActiva&&<span style={{marginLeft:6,background:"#7c3aed",color:"#e9d5ff",padding:"1px 6px",borderRadius:5,fontSize:9,fontWeight:800}}>OFERTA</span>}
+                              </td>
+                              <td style={{...C.td,color:"#94a3b8"}}>{fmt(p.costo)}</td>
+                              <td style={{...C.td,fontWeight:600}}>{fmt(p.pventa)}</td>
+                              <td style={C.td}>{g&&<span style={{background:Number(g)>=30?"#0a2e1a":"#2e1a0a",color:Number(g)>=30?"#22c55e":"#f97316",padding:"2px 7px",borderRadius:8,fontWeight:700,fontSize:11}}>{g}%</span>}</td>
+                              <td style={{...C.td,color:"#64748b",fontSize:11}}>{p.cantOfer}</td>
+                              <td style={{...C.td,color:p.ofActiva?"#e879f9":"#38bdf8",fontWeight:700}}>{fmt(p.poferta)}</td>
+                              <td style={C.td}><span style={{background:p.stock<=5?"#450a0a":p.stock<=15?"#431407":"#0a2e1a",color:p.stock<=5?"#ef4444":p.stock<=15?"#f97316":"#22c55e",padding:"2px 9px",borderRadius:18,fontWeight:700,fontSize:11}}>{p.stock}</span></td>
+                              <td style={C.td}><button onClick={()=>{setEp({...p,costo:String(p.costo),pventa:String(p.pventa),poferta:String(p.poferta)});setMEditar(p.id);}} style={{padding:"3px 9px",background:"#334155",border:"1px solid #475569",borderRadius:6,color:"#94a3b8",cursor:"pointer",fontSize:12}}>✏️</button></td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ── VENTAS ── */}
+        {tab==="Ventas"&&(
+          <div>
+            <div style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap",alignItems:"flex-end"}}>
+              <div style={{flex:1,minWidth:140}}>
+                <div style={C.lbl}>Cliente</div>
+                <select value={fVCli} onChange={e=>setFVCli(e.target.value)} style={C.sel}>
+                  <option value="">Todos</option>
+                  {[...clientes].sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(c=><option key={c.id} value={c.id}>{c.nombre}</option>)}
+                </select>
+              </div>
+              <div><div style={C.lbl}>Desde</div><input type="date" value={fVDesde} onChange={e=>setFVDesde(e.target.value)} style={{...C.inp,width:140}}/></div>
+              <div><div style={C.lbl}>Hasta</div><input type="date" value={fVHasta} onChange={e=>setFVHasta(e.target.value)} style={{...C.inp,width:140}}/></div>
+              <button onClick={()=>{setFVCli("");setFVDesde("");setFVHasta("");}} style={{...C.btn("#1e293b","#64748b"),border:"1px solid #2d3748"}}>✕</button>
+              <button onClick={()=>setMVenta(true)} style={C.btn("linear-gradient(135deg,#38bdf8,#818cf8)")}>+ Nueva Venta</button>
+            </div>
+            <div style={{display:"flex",gap:10,marginBottom:14}}>
+              {[{l:"Total",v:fmt(totFilt),c:"#22c55e"},{l:"Ganancia",v:fmt(ganFilt),c:"#a78bfa"},{l:"Operaciones",v:ventasFilt.length,c:"#38bdf8"}].map(x=>(
+                <div key={x.l} style={{...C.card,padding:"11px 16px",flex:1}}>
+                  <div style={{fontSize:10,color:"#64748b"}}>{x.l}</div>
+                  <div style={{fontSize:16,fontWeight:700,color:x.c}}>{x.v}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{overflowX:"auto"}}>
+              <table style={{width:"100%",borderCollapse:"collapse"}}>
+                <thead><tr style={{background:"#0f172a"}}>{["Fecha","Cliente","Producto","Cant.","Precio","Costo","Ganancia","Total"].map(h=><th key={h} style={C.th}>{h}</th>)}</tr></thead>
+                <tbody>
+                  {ventasFilt.map(v=>(
+                    <tr key={v.id} onMouseEnter={e=>e.currentTarget.style.background="#1e293b"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                      <td style={{...C.td,color:"#94a3b8"}}>{v.fecha}</td>
+                      <td style={{...C.td,fontWeight:600}}>{v.cliNom}</td>
+                      <td style={{...C.td,maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{v.prodNom}</td>
+                      <td style={{...C.td,textAlign:"center"}}>{v.cant}</td>
+                      <td style={C.td}>{fmt(v.precio)}</td>
+                      <td style={{...C.td,color:"#94a3b8"}}>{fmt(v.costo)}</td>
+                      <td style={{...C.td,color:"#a78bfa",fontWeight:700}}>{fmt(v.total-v.costo*v.cant)}</td>
+                      <td style={{...C.td,color:"#22c55e",fontWeight:700}}>{fmt(v.total)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ── CLIENTES ── */}
+        {tab==="Clientes"&&(
+          <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+              <div style={{fontWeight:700}}>Clientes — Deuda: <span style={{color:"#f59e0b"}}>{fmt(totDeudaCli)}</span></div>
+              <button onClick={()=>setMCliente(true)} style={C.btn("linear-gradient(135deg,#22c55e,#16a34a)","#fff")}>+ Nuevo Cliente</button>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(255px,1fr))",gap:12}}>
+              {[...clientes].sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(c=>(
+                <div key={c.id} style={{...C.card,border:c.deuda>0?"1px solid #f59e0b44":"1px solid #2d3748"}}>
+                  <div style={{fontWeight:700,marginBottom:5}}>{c.nombre}</div>
+                  <div style={{fontSize:12,color:"#64748b"}}>📞 {c.tel}</div>
+                  <div style={{fontSize:12,color:"#64748b"}}>✉️ {c.email}</div>
+                  <div style={{marginTop:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div>
+                      <div style={{fontSize:10,color:"#64748b"}}>Deuda</div>
+                      <div style={{fontSize:17,fontWeight:700,color:c.deuda>0?"#f59e0b":"#22c55e"}}>{fmt(c.deuda)}</div>
+                    </div>
+                    {c.deuda>0&&<button onClick={()=>setMDeudaCli(c)} style={{...C.btn("#f59e0b"),padding:"7px 11px",fontSize:12}}>Registrar Pago</button>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── PROVEEDORES ── */}
+        {tab==="Proveedores"&&(
+          <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+              <div style={{fontWeight:700}}>Proveedores — Deuda: <span style={{color:"#ef4444"}}>{fmt(totDeudaProv)}</span></div>
+              <button onClick={()=>setMProveedor(true)} style={C.btn("linear-gradient(135deg,#ef4444,#b91c1c)","#fff")}>+ Nuevo Proveedor</button>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(255px,1fr))",gap:12}}>
+              {[...provs].sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(p=>(
+                <div key={p.id} style={{...C.card,border:p.deuda>0?"1px solid #ef444444":"1px solid #2d3748"}}>
+                  <div style={{fontWeight:700,marginBottom:5}}>{p.nombre}</div>
+                  <div style={{fontSize:12,color:"#64748b"}}>✉️ {p.contacto}</div>
+                  <div style={{fontSize:12,color:"#64748b"}}>📞 {p.tel}</div>
+                  <div style={{marginTop:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div>
+                      <div style={{fontSize:10,color:"#64748b"}}>Deuda con proveedor</div>
+                      <div style={{fontSize:17,fontWeight:700,color:p.deuda>0?"#ef4444":"#22c55e"}}>{fmt(p.deuda)}</div>
+                    </div>
+                    {p.deuda>0&&<button onClick={()=>setMDeudaProv(p)} style={{...C.btn("#ef4444","#fff"),padding:"7px 11px",fontSize:12}}>Registrar Pago</button>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── STOCK ── */}
+        {tab==="Stock"&&(
+          <div>
+            <div style={{fontWeight:700,marginBottom:16}}>Stock — ordenado por menor disponibilidad</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(230px,1fr))",gap:10}}>
+              {[...prods].sort((a,b)=>a.stock-b.stock).map(p=>{
+                const col=p.stock<=5?"#ef4444":p.stock<=15?"#f97316":"#22c55e";
+                return(
+                  <div key={p.id} style={{...C.card,border:`1px solid ${col}22`,padding:13}}>
+                    <div style={{fontSize:12,fontWeight:600,marginBottom:4}}>{p.nom}</div>
+                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:7}}>
+                      <span style={{fontSize:10,color:"#64748b"}}>{p.cat}</span>
+                      <span style={{fontWeight:700,color:col,fontSize:13}}>{p.stock} uds</span>
+                    </div>
+                    <div style={{background:"#0f172a",borderRadius:4,height:5}}>
+                      <div style={{width:`${Math.min(100,(p.stock/50)*100)}%`,height:"100%",background:col,borderRadius:4}}/>
+                    </div>
+                    {p.stock<=5&&<div style={{fontSize:10,color:"#ef4444",marginTop:5,fontWeight:600}}>⚠️ Reponer urgente</div>}
+                    {p.stock>5&&p.stock<=15&&<div style={{fontSize:10,color:"#f97316",marginTop:5}}>⚡ Stock bajo</div>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── MODALES ── */}
+      {mVenta&&(
+        <Modal title="Nueva Venta" onClose={()=>setMVenta(false)}>
+          <label style={C.lbl}>Cliente</label>
+          <select value={nv.cliId} onChange={e=>setNv({...nv,cliId:e.target.value})} style={C.sel}>
+            <option value="">Seleccionar...</option>
+            {[...clientes].sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(c=><option key={c.id} value={c.id}>{c.nombre}</option>)}
+          </select>
+          <label style={C.lbl}>Producto</label>
+          <select value={nv.prodId} onChange={e=>setNv({...nv,prodId:e.target.value})} style={C.sel}>
+            <option value="">Seleccionar...</option>
+            {[...prods].sort((a,b)=>a.nom.localeCompare(b.nom)).map(p=><option key={p.id} value={p.id}>{p.nom} · Stock: {p.stock}</option>)}
+          </select>
+          <label style={C.lbl}>Cantidad</label>
+          <input type="number" min={1} value={nv.cant} onChange={e=>setNv({...nv,cant:e.target.value})} style={C.inp}/>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginTop:12}}>
+            <input type="checkbox" checked={nv.oferta} onChange={e=>setNv({...nv,oferta:e.target.checked})}/>
+            <label style={{fontSize:13,color:"#38bdf8",cursor:"pointer"}}>Precio oferta</label>
+          </div>
+          {nv.prodId&&nv.cant>0&&(()=>{
+            const pr=prods.find(p=>p.id===Number(nv.prodId)); if(!pr) return null;
+            const precio=nv.oferta?pr.poferta:pr.pventa; const total=precio*Number(nv.cant);
+            return(
+              <div style={{background:"#0f172a",borderRadius:10,padding:12,marginTop:12}}>
+                <div style={{fontSize:12,color:"#64748b"}}>Precio unit: <b style={{color:"#f1f5f9"}}>{fmt(precio)}</b></div>
+                <div style={{fontSize:12,color:"#64748b",marginTop:3}}>Ganancia: <b style={{color:"#a78bfa"}}>{fmt(total-pr.costo*Number(nv.cant))}</b></div>
+                <div style={{fontSize:15,fontWeight:700,color:"#22c55e",marginTop:6}}>Total: {fmt(total)}</div>
+              </div>
+            );
+          })()}
+          <button onClick={registrarVenta} style={{...C.btn("linear-gradient(135deg,#38bdf8,#818cf8)"),width:"100%",padding:12,marginTop:18}}>Registrar Venta</button>
+        </Modal>
+      )}
+
+      {mProducto&&(
+        <Modal title="Agregar Producto" onClose={()=>setMProducto(false)}>
+          <label style={C.lbl}>Categoría</label>
+          <select value={nProd.cat} onChange={e=>setNProd({...nProd,cat:e.target.value})} style={C.sel}><option>Accesorios</option><option>Genérico</option></select>
+          <label style={C.lbl}>Nombre</label>
+          <input value={nProd.nom} onChange={e=>setNProd({...nProd,nom:e.target.value})} style={C.inp} placeholder="Nombre del producto"/>
+          <label style={C.lbl}>Costo</label>
+          <input type="number" value={nProd.costo} onChange={e=>setNProd({...nProd,costo:e.target.value})} style={C.inp} placeholder="0"/>
+          <label style={C.lbl}>Precio de Venta</label>
+          <input type="number" value={nProd.pventa} onChange={e=>setNProd({...nProd,pventa:e.target.value})} style={C.inp} placeholder="0"/>
+          {nProd.costo&&nProd.pventa&&<div style={{background:"#0f172a",borderRadius:8,padding:8,marginTop:8,fontSize:12}}>Ganancia: <b style={{color:"#22c55e"}}>{(((Number(nProd.pventa)-Number(nProd.costo))/Number(nProd.costo))*100).toFixed(1)}%</b></div>}
+          <label style={C.lbl}>Cantidad Oferta</label>
+          <input value={nProd.cantOfer} onChange={e=>setNProd({...nProd,cantOfer:e.target.value})} style={C.inp} placeholder="Ej: 10 unidades"/>
+          <label style={C.lbl}>Precio Oferta</label>
+          <input type="number" value={nProd.poferta} onChange={e=>setNProd({...nProd,poferta:e.target.value})} style={C.inp} placeholder="0"/>
+          <label style={C.lbl}>Stock inicial</label>
+          <input type="number" value={nProd.stock} onChange={e=>setNProd({...nProd,stock:e.target.value})} style={C.inp} placeholder="0"/>
+          <button onClick={()=>{
+            if(!nProd.nom||!nProd.pventa) return;
+            setProds([...prods,{id:prods.length+1,cat:nProd.cat,nom:nProd.nom,costo:Number(nProd.costo)||0,pventa:Number(nProd.pventa),cantOfer:nProd.cantOfer||"-",poferta:Number(nProd.poferta)||Number(nProd.pventa),stock:Number(nProd.stock)||0,ofActiva:false}]);
+            setNProd({cat:"Accesorios",nom:"",costo:"",pventa:"",cantOfer:"",poferta:"",stock:""}); setMProducto(false);
+          }} style={{...C.btn("linear-gradient(135deg,#38bdf8,#818cf8)"),width:"100%",padding:12,marginTop:18}}>Agregar Producto</button>
+        </Modal>
+      )}
+
+      {mEditar&&ep&&(
+        <Modal title={`✏️ ${ep.nom.slice(0,32)}…`} onClose={()=>{setMEditar(null);setEp(null);}}>
+          <label style={C.lbl}>Costo</label>
+          <input type="number" value={ep.costo} onChange={e=>setEp({...ep,costo:e.target.value})} style={C.inp}/>
+          <label style={C.lbl}>Precio de Venta</label>
+          <input type="number" value={ep.pventa} onChange={e=>setEp({...ep,pventa:e.target.value})} style={C.inp}/>
+          {ep.costo&&ep.pventa&&<div style={{background:"#0f172a",borderRadius:8,padding:8,marginTop:8,fontSize:12}}>Ganancia: <b style={{color:((Number(ep.pventa)-Number(ep.costo))/Number(ep.costo)*100)>=30?"#22c55e":"#f97316"}}>{((Number(ep.pventa)-Number(ep.costo))/Number(ep.costo)*100).toFixed(1)}%</b></div>}
+          <div style={{background:"#1a0a2e",border:"1px solid #7c3aed44",borderRadius:12,padding:14,marginTop:16}}>
+            <div style={{fontWeight:700,color:"#e879f9",marginBottom:10,fontSize:13}}>🏷️ Oferta</div>
+            <label style={C.lbl}>Descripción</label>
+            <input value={ep.cantOfer} onChange={e=>setEp({...ep,cantOfer:e.target.value})} style={{...C.inp,border:"1px solid #4c1d95"}} placeholder="Ej: 10 unidades"/>
+            <label style={C.lbl}>Precio Oferta</label>
+            <input type="number" value={ep.poferta} onChange={e=>setEp({...ep,poferta:e.target.value})} style={{...C.inp,border:"1px solid #4c1d95"}}/>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginTop:12}}>
+              <input type="checkbox" checked={ep.ofActiva||false} onChange={e=>setEp({...ep,ofActiva:e.target.checked})} style={{accentColor:"#a855f7",width:15,height:15}}/>
+              <label style={{fontSize:13,color:"#e879f9",cursor:"pointer"}}>Activar oferta</label>
+            </div>
+          </div>
+          <button onClick={guardarEditar} style={{...C.btn("linear-gradient(135deg,#a855f7,#38bdf8)","#fff"),width:"100%",padding:12,marginTop:18}}>💾 Guardar Cambios</button>
+        </Modal>
+      )}
+
+      {mCliente&&(
+        <Modal title="Nuevo Cliente" onClose={()=>setMCliente(false)}>
+          <label style={C.lbl}>Nombre</label><input value={nc.nombre} onChange={e=>setNc({...nc,nombre:e.target.value})} style={C.inp} placeholder="Farmacia..."/>
+          <label style={C.lbl}>Teléfono</label><input value={nc.tel} onChange={e=>setNc({...nc,tel:e.target.value})} style={C.inp}/>
+          <label style={C.lbl}>Email</label><input value={nc.email} onChange={e=>setNc({...nc,email:e.target.value})} style={C.inp}/>
+          <button onClick={()=>{if(!nc.nombre)return;setClientes([...clientes,{id:clientes.length+1,...nc,deuda:0}]);setNc({nombre:"",tel:"",email:""});setMCliente(false);}} style={{...C.btn("linear-gradient(135deg,#22c55e,#16a34a)","#fff"),width:"100%",padding:12,marginTop:18}}>Agregar</button>
+        </Modal>
+      )}
+
+      {mProveedor&&(
+        <Modal title="Nuevo Proveedor" onClose={()=>setMProveedor(false)}>
+          <label style={C.lbl}>Nombre</label><input value={np.nombre} onChange={e=>setNp({...np,nombre:e.target.value})} style={C.inp}/>
+          <label style={C.lbl}>Contacto</label><input value={np.contacto} onChange={e=>setNp({...np,contacto:e.target.value})} style={C.inp}/>
+          <label style={C.lbl}>Teléfono</label><input value={np.tel} onChange={e=>setNp({...np,tel:e.target.value})} style={C.inp}/>
+          <button onClick={()=>{if(!np.nombre)return;setProvs([...provs,{id:provs.length+1,...np,deuda:0}]);setNp({nombre:"",contacto:"",tel:""});setMProveedor(false);}} style={{...C.btn("linear-gradient(135deg,#ef4444,#b91c1c)","#fff"),width:"100%",padding:12,marginTop:18}}>Agregar</button>
+        </Modal>
+      )}
+
+      {mDeudaCli&&<PagoModal titulo={mDeudaCli.nombre} deuda={mDeudaCli.deuda} onClose={()=>setMDeudaCli(null)} onPagar={m=>{setClientes(clientes.map(c=>c.id===mDeudaCli.id?{...c,deuda:Math.max(0,c.deuda-m)}:c));setMDeudaCli(null);}}/>}
+      {mDeudaProv&&<PagoModal titulo={mDeudaProv.nombre} deuda={mDeudaProv.deuda} onClose={()=>setMDeudaProv(null)} onPagar={m=>{setProvs(provs.map(p=>p.id===mDeudaProv.id?{...p,deuda:Math.max(0,p.deuda-m)}:p));setMDeudaProv(null);}}/>}
+    </div>
+  );
+}
+
+// ─── Panel Pedidos Clientes ─────────────────────────────────────
+function PanelCli({prods,clientes,pedCli,pedCliAct,setPedCliAct,busqCli,setBusqCli,nuevoPedCli,addItemCli,removeItemCli,cantItemCli,confirmarCli,cancelarCli,fmt,C}){
+  const [cliSel,setCli]=useState("");
+  const [pSel,setP]=useState("");
+  const [cant,setCant]=useState(1);
+  const [oferta,setOf]=useState(false);
+  const vista=pedCli.find(p=>p.id===pedCliAct);
+  const pFilt=prods.filter(p=>p.nom.toLowerCase().includes(busqCli.toLowerCase())).sort((a,b)=>a.nom.localeCompare(b.nom));
+
+  return(
+    <div>
+      <div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap",alignItems:"center"}}>
+        <select value={cliSel} onChange={e=>setCli(e.target.value)} style={{...C.sel,flex:1,maxWidth:250}}>
+          <option value="">Seleccionar cliente...</option>
+          {[...clientes].sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(c=><option key={c.id} value={c.id}>{c.nombre}</option>)}
+        </select>
+        <button onClick={()=>{if(cliSel){nuevoPedCli(cliSel);setCli("");}}} style={C.btn("linear-gradient(135deg,#38bdf8,#818cf8)")}>+ Nuevo Pedido</button>
+        <div style={{fontSize:12,color:"#64748b",marginLeft:"auto"}}>Abiertos: <b style={{color:"#f59e0b"}}>{pedCli.filter(p=>p.estado==="abierto").length}</b> · Entregados: <b style={{color:"#22c55e"}}>{pedCli.filter(p=>p.estado==="entregado").length}</b></div>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"minmax(240px,1fr) minmax(300px,1.8fr)",gap:18}}>
+        <div>
+          {pedCli.length===0&&<div style={{...C.card,textAlign:"center",color:"#475569",padding:28}}><div style={{fontSize:28,marginBottom:6}}>🛒</div>Creá un pedido</div>}
+          {pedCli.map(p=>{
+            const tot=p.items.reduce((s,i)=>s+i.sub,0);
+            const act=pedCliAct===p.id;
+            const ec=p.estado==="entregado"?"#22c55e":p.estado==="cancelado"?"#ef4444":"#f59e0b";
+            const eb=p.estado==="entregado"?"#0a2e1a":p.estado==="cancelado"?"#450a0a":"#431407";
+            return(
+              <div key={p.id} onClick={()=>p.estado==="abierto"&&setPedCliAct(act?null:p.id)}
+                style={{background:act?"#1a3350":"#1e293b",border:`1px solid ${act?"#38bdf8":"#2d3748"}`,borderRadius:12,padding:13,marginBottom:9,cursor:p.estado==="abierto"?"pointer":"default"}}>
+                <div style={{display:"flex",justifyContent:"space-between"}}>
+                  <div><div style={{fontWeight:700,fontSize:13}}>{p.cliNom}</div><div style={{fontSize:11,color:"#64748b"}}>{p.fecha} · {p.items.length} prod.</div></div>
+                  <div style={{textAlign:"right"}}><div style={{fontWeight:700,color:"#22c55e",fontSize:13}}>{fmt(tot)}</div><span style={{background:eb,color:ec,padding:"1px 7px",borderRadius:5,fontSize:10,fontWeight:700}}>{p.estado.toUpperCase()}</span></div>
+                </div>
+                {act&&p.estado==="abierto"&&(
+                  <div style={{display:"flex",gap:7,marginTop:9}}>
+                    <button onClick={e=>{e.stopPropagation();confirmarCli(p.id);}} style={{flex:1,padding:"7px",background:"#22c55e",border:"none",borderRadius:8,color:"#0f172a",fontWeight:800,cursor:"pointer",fontSize:12}}>✓ Confirmar y descontar stock</button>
+                    <button onClick={e=>{e.stopPropagation();cancelarCli(p.id);}} style={{padding:"7px 10px",background:"#450a0a",border:"1px solid #ef4444",borderRadius:8,color:"#ef4444",cursor:"pointer",fontSize:12}}>✕</button>
+                  </div>
+                )}
+                {p.estado==="entregado"&&<div style={{fontSize:10,color:"#22c55e",marginTop:5}}>✓ Stock descontado · Registrado en ventas</div>}
+              </div>
+            );
+          })}
+        </div>
+
+        <div>
+          {!vista?(
+            <div style={{...C.card,textAlign:"center",color:"#475569",padding:44,border:"2px dashed #2d3748"}}>
+              <div style={{fontSize:34,marginBottom:8}}>🛒</div>
+              <div style={{color:"#64748b"}}>Seleccioná un pedido abierto o creá uno nuevo</div>
+            </div>
+          ):(
+            <div style={{...C.card,border:"1px solid #38bdf844"}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:12,paddingBottom:10,borderBottom:"1px solid #2d3748"}}>
+                <div><div style={{fontWeight:700,color:"#38bdf8"}}>{vista.cliNom}</div><div style={{fontSize:11,color:"#64748b"}}>{vista.fecha}</div></div>
+                <div style={{fontWeight:800,fontSize:19,color:"#22c55e"}}>{fmt(vista.items.reduce((s,i)=>s+i.sub,0))}</div>
+              </div>
+              <div style={{background:"#0f172a",borderRadius:9,padding:12,marginBottom:12}}>
+                <div style={{fontSize:12,fontWeight:700,color:"#38bdf8",marginBottom:8}}>➕ Agregar producto</div>
+                <input placeholder="🔍 Buscar..." value={busqCli} onChange={e=>setBusqCli(e.target.value)} style={{...C.inp,marginBottom:7}}/>
+                <select value={pSel} onChange={e=>setP(e.target.value)} style={{...C.sel,marginBottom:7}}>
+                  <option value="">Seleccionar...</option>
+                  {pFilt.map(p=><option key={p.id} value={p.id} disabled={p.stock<=0}>{p.nom} · Stock:{p.stock}{p.ofActiva?" 🏷️":""}</option>)}
+                </select>
+                <div style={{display:"flex",gap:7,marginBottom:7,alignItems:"center"}}>
+                  <input type="number" min={1} value={cant} onChange={e=>setCant(e.target.value)} style={{...C.inp,width:70,padding:"7px 9px"}}/>
+                  <label style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:"#a78bfa",cursor:"pointer"}}>
+                    <input type="checkbox" checked={oferta} onChange={e=>setOf(e.target.checked)} style={{accentColor:"#a855f7"}}/>Oferta
+                  </label>
+                  {pSel&&cant>0&&(()=>{const pp=prods.find(p=>p.id===Number(pSel));if(!pp)return null;const pr=oferta?pp.poferta:pp.pventa;return<div style={{fontSize:12,color:"#22c55e",fontWeight:700}}>{fmt(pr*Number(cant))}</div>;})()}
+                </div>
+                <button onClick={()=>{if(!pSel||cant<1)return;addItemCli(vista.id,pSel,cant,oferta);setP("");setCant(1);setOf(false);setBusqCli("");}}
+                  style={{...C.btn("linear-gradient(135deg,#38bdf8,#818cf8)"),width:"100%",padding:"8px"}}>+ Agregar</button>
+              </div>
+              {vista.items.length===0?<div style={{color:"#475569",fontSize:12,textAlign:"center",padding:14}}>Pedido vacío</div>:(
+                <>
+                  {vista.items.map(i=>(
+                    <div key={i.prodId} style={{display:"flex",alignItems:"center",gap:7,padding:"8px 0",borderBottom:"1px solid #2d3748"}}>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:12,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i.nom}</div>
+                        <div style={{fontSize:11,color:"#64748b"}}>{fmt(i.precio)} c/u{i.oferta&&<span style={{color:"#e879f9"}}> · oferta</span>}</div>
+                      </div>
+                      <input type="number" min={1} value={i.cant} onChange={e=>cantItemCli(vista.id,i.prodId,e.target.value)}
+                        style={{width:48,padding:"4px 6px",borderRadius:7,border:"1px solid #334155",background:"#0f172a",color:"#e2e8f0",fontSize:12,textAlign:"center"}}/>
+                      <div style={{fontWeight:700,color:"#22c55e",minWidth:68,textAlign:"right",fontSize:12}}>{fmt(i.sub)}</div>
+                      <button onClick={()=>removeItemCli(vista.id,i.prodId)} style={{padding:"3px 6px",background:"#450a0a",border:"1px solid #ef444466",borderRadius:6,color:"#ef4444",cursor:"pointer",fontSize:11}}>✕</button>
+                    </div>
+                  ))}
+                  <div style={{display:"flex",justifyContent:"space-between",padding:"10px 0 2px",borderTop:"2px solid #334155",marginTop:2}}>
+                    <div style={{fontSize:11,color:"#a78bfa"}}>Ganancia: {fmt(vista.items.reduce((s,i)=>s+(i.precio-i.costo)*i.cant,0))}</div>
+                    <div style={{fontWeight:800,fontSize:18,color:"#22c55e"}}>{fmt(vista.items.reduce((s,i)=>s+i.sub,0))}</div>
+                  </div>
+                  <button onClick={()=>confirmarCli(vista.id)} style={{...C.btn("linear-gradient(135deg,#22c55e,#16a34a)","#fff"),width:"100%",padding:12,marginTop:9,fontSize:13,fontWeight:800}}>
+                    ✓ Confirmar Pedido — Descontar Stock
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Panel Pedidos Proveedores ──────────────────────────────────
+function PanelProv({prods,provs,pedProv,pedProvAct,setPedProvAct,busqProv,setBusqProv,nuevoPedProv,addItemProv,removeItemProv,cantItemProv,recibirProv,cancelarProv,fmt,C}){
+  const [provSel,setPrv]=useState("");
+  const [pSel,setP]=useState("");
+  const [cant,setCant]=useState(1);
+  const vista=pedProv.find(p=>p.id===pedProvAct);
+  const pFilt=prods.filter(p=>p.nom.toLowerCase().includes(busqProv.toLowerCase())).sort((a,b)=>a.nom.localeCompare(b.nom));
+
+  return(
+    <div>
+      <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
+        <select value={provSel} onChange={e=>setPrv(e.target.value)} style={{...C.sel,flex:1,maxWidth:250}}>
+          <option value="">Seleccionar proveedor...</option>
+          {[...provs].sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(p=><option key={p.id} value={p.id}>{p.nombre}</option>)}
+        </select>
+        <button onClick={()=>{if(provSel){nuevoPedProv(provSel);setPrv("");}}} style={C.btn("linear-gradient(135deg,#f59e0b,#ef4444)")}>+ Nuevo Pedido</button>
+        <div style={{fontSize:12,color:"#64748b",marginLeft:"auto"}}>Pendientes: <b style={{color:"#f59e0b"}}>{pedProv.filter(p=>p.estado==="pendiente").length}</b> · Recibidos: <b style={{color:"#22c55e"}}>{pedProv.filter(p=>p.estado==="recibido").length}</b></div>
+      </div>
+
+      <div style={{background:"#1a2a1a",border:"1px solid #22c55e33",borderRadius:9,padding:"9px 14px",marginBottom:14,fontSize:12,color:"#86efac"}}>
+        💡 Al <b>recibir</b> el pedido, el stock sube automáticamente y la deuda con el proveedor aumenta.
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"minmax(240px,1fr) minmax(300px,1.8fr)",gap:18}}>
+        <div>
+          {pedProv.length===0&&<div style={{...C.card,textAlign:"center",color:"#475569",padding:28}}><div style={{fontSize:28,marginBottom:6}}>📦</div>Creá un pedido a proveedor</div>}
+          {pedProv.map(p=>{
+            const tot=p.items.reduce((s,i)=>s+i.sub,0);
+            const act=pedProvAct===p.id;
+            const ec=p.estado==="recibido"?"#22c55e":p.estado==="cancelado"?"#ef4444":"#f59e0b";
+            const eb=p.estado==="recibido"?"#0a2e1a":p.estado==="cancelado"?"#450a0a":"#431407";
+            return(
+              <div key={p.id} onClick={()=>p.estado==="pendiente"&&setPedProvAct(act?null:p.id)}
+                style={{background:act?"#2a1f0a":"#1e293b",border:`1px solid ${act?"#f59e0b":"#2d3748"}`,borderRadius:12,padding:13,marginBottom:9,cursor:p.estado==="pendiente"?"pointer":"default"}}>
+                <div style={{display:"flex",justifyContent:"space-between"}}>
+                  <div><div style={{fontWeight:700,fontSize:13}}>{p.provNom}</div><div style={{fontSize:11,color:"#64748b"}}>{p.fecha} · {p.items.length} prod.</div></div>
+                  <div style={{textAlign:"right"}}><div style={{fontWeight:700,color:"#f59e0b",fontSize:13}}>{fmt(tot)}</div><span style={{background:eb,color:ec,padding:"1px 7px",borderRadius:5,fontSize:10,fontWeight:700}}>{p.estado.toUpperCase()}</span></div>
+                </div>
+                {act&&p.estado==="pendiente"&&(
+                  <div style={{display:"flex",gap:7,marginTop:9}}>
+                    <button onClick={e=>{e.stopPropagation();recibirProv(p.id);}} style={{flex:1,padding:"7px",background:"#f59e0b",border:"none",borderRadius:8,color:"#0f172a",fontWeight:800,cursor:"pointer",fontSize:12}}>📥 Recibir — Sumar Stock</button>
+                    <button onClick={e=>{e.stopPropagation();cancelarProv(p.id);}} style={{padding:"7px 10px",background:"#450a0a",border:"1px solid #ef4444",borderRadius:8,color:"#ef4444",cursor:"pointer",fontSize:12}}>✕</button>
+                  </div>
+                )}
+                {p.estado==="recibido"&&<div style={{fontSize:10,color:"#22c55e",marginTop:5}}>✓ Stock sumado · Deuda actualizada</div>}
+              </div>
+            );
+          })}
+        </div>
+
+        <div>
+          {!vista?(
+            <div style={{...C.card,textAlign:"center",color:"#475569",padding:44,border:"2px dashed #2d3748"}}>
+              <div style={{fontSize:34,marginBottom:8}}>📦</div>
+              <div style={{color:"#64748b"}}>Seleccioná un pedido o creá uno nuevo</div>
+            </div>
+          ):(
+            <div style={{...C.card,border:"1px solid #f59e0b44"}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:12,paddingBottom:10,borderBottom:"1px solid #2d3748"}}>
+                <div><div style={{fontWeight:700,color:"#f59e0b"}}>{vista.provNom}</div><div style={{fontSize:11,color:"#64748b"}}>{vista.fecha}</div></div>
+                <div style={{fontWeight:800,fontSize:19,color:"#f59e0b"}}>{fmt(vista.items.reduce((s,i)=>s+i.sub,0))}</div>
+              </div>
+              <div style={{background:"#0f172a",borderRadius:9,padding:12,marginBottom:12}}>
+                <div style={{fontSize:12,fontWeight:700,color:"#f59e0b",marginBottom:8}}>➕ Agregar producto a reponer</div>
+                <input placeholder="🔍 Buscar..." value={busqProv} onChange={e=>setBusqProv(e.target.value)} style={{...C.inp,marginBottom:7}}/>
+                <select value={pSel} onChange={e=>setP(e.target.value)} style={{...C.sel,marginBottom:7}}>
+                  <option value="">Seleccionar...</option>
+                  {pFilt.map(p=><option key={p.id} value={p.id}>{p.nom} · Stock actual: {p.stock}{p.stock<=5?" ⚠️":""}</option>)}
+                </select>
+                <div style={{display:"flex",gap:7,marginBottom:7,alignItems:"center"}}>
+                  <input type="number" min={1} value={cant} onChange={e=>setCant(e.target.value)} style={{...C.inp,width:70,padding:"7px 9px"}}/>
+                  {pSel&&cant>0&&(()=>{const pp=prods.find(p=>p.id===Number(pSel));if(!pp)return null;return<div style={{fontSize:12,color:"#f59e0b",fontWeight:700}}>Costo: {fmt(pp.costo*Number(cant))}</div>;})()}
+                </div>
+                <button onClick={()=>{if(!pSel||cant<1)return;addItemProv(vista.id,pSel,cant);setP("");setCant(1);setBusqProv("");}}
+                  style={{...C.btn("linear-gradient(135deg,#f59e0b,#ef4444)"),width:"100%",padding:"8px"}}>+ Agregar</button>
+              </div>
+              {vista.items.length===0?<div style={{color:"#475569",fontSize:12,textAlign:"center",padding:14}}>Pedido vacío</div>:(
+                <>
+                  {vista.items.map(i=>(
+                    <div key={i.prodId} style={{display:"flex",alignItems:"center",gap:7,padding:"8px 0",borderBottom:"1px solid #2d3748"}}>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:12,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i.nom}</div>
+                        <div style={{fontSize:11,color:"#64748b"}}>Costo: {fmt(i.costo)} c/u</div>
+                      </div>
+                      <input type="number" min={1} value={i.cant} onChange={e=>cantItemProv(vista.id,i.prodId,e.target.value)}
+                        style={{width:48,padding:"4px 6px",borderRadius:7,border:"1px solid #334155",background:"#0f172a",color:"#e2e8f0",fontSize:12,textAlign:"center"}}/>
+                      <div style={{fontWeight:700,color:"#f59e0b",minWidth:68,textAlign:"right",fontSize:12}}>{fmt(i.sub)}</div>
+                      <button onClick={()=>removeItemProv(vista.id,i.prodId)} style={{padding:"3px 6px",background:"#450a0a",border:"1px solid #ef444466",borderRadius:6,color:"#ef4444",cursor:"pointer",fontSize:11}}>✕</button>
+                    </div>
+                  ))}
+                  <div style={{display:"flex",justifyContent:"space-between",padding:"10px 0 2px",borderTop:"2px solid #334155",marginTop:2}}>
+                    <div style={{fontSize:11,color:"#64748b"}}>{vista.items.reduce((s,i)=>s+i.cant,0)} unidades</div>
+                    <div style={{fontWeight:800,fontSize:18,color:"#f59e0b"}}>{fmt(vista.items.reduce((s,i)=>s+i.sub,0))}</div>
+                  </div>
+                  <button onClick={()=>recibirProv(vista.id)} style={{...C.btn("linear-gradient(135deg,#f59e0b,#ef4444)"),width:"100%",padding:12,marginTop:9,fontSize:13,fontWeight:800}}>
+                    📥 Recibir Pedido — Sumar Stock
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Componentes base ──────────────────────────────────────────
+function Modal({title,children,onClose}){
+  return(
+    <div style={{position:"fixed",inset:0,background:"#000000bb",display:"flex",alignItems:"center",justifyContent:"center",zIndex:999,padding:16}}>
+      <div style={{background:"#1e293b",borderRadius:14,padding:24,width:"100%",maxWidth:450,boxShadow:"0 20px 50px #00000077",maxHeight:"92vh",overflowY:"auto"}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:18}}>
+          <div style={{fontWeight:700,fontSize:15}}>{title}</div>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:21}}>×</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function PagoModal({titulo,deuda,onClose,onPagar}){
+  const [m,setM]=useState("");
+  const fmt2=n=>`$${Number(n).toLocaleString("es-AR")}`;
+  return(
+    <Modal title={`Pago — ${titulo}`} onClose={onClose}>
+      <div style={{fontSize:13,color:"#64748b",marginBottom:8}}>Deuda: <b style={{color:"#f59e0b"}}>{fmt2(deuda)}</b></div>
+      <label style={{fontSize:12,fontWeight:600,color:"#64748b",display:"block",marginBottom:6}}>Monto a pagar</label>
+      <input type="number" min={1} max={deuda} value={m} onChange={e=>setM(e.target.value)} style={{width:"100%",padding:"10px 14px",borderRadius:10,border:"1px solid #2d3748",background:"#0f1117",color:"#e2e8f0",fontSize:13,boxSizing:"border-box"}}/>
+      <button onClick={()=>{if(m>0)onPagar(Number(m));}} style={{width:"100%",padding:12,background:"linear-gradient(135deg,#38bdf8,#818cf8)",border:"none",borderRadius:10,color:"#0f172a",fontWeight:700,cursor:"pointer",fontSize:14,marginTop:18}}>Confirmar Pago</button>
+    </Modal>
+  );
+}
+
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(App));
+
+    // PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(()=>{});
+      });
+    }
+  </script>
+</body>
+</html>
